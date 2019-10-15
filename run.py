@@ -39,11 +39,11 @@ class Apple():
 
     def post_email(self, eml):
         try:
-            r = requests.post('https://idmsac.apple.com/authenticate',
+            r = requests.post('https://idmsac.apple.com/IDMSWebAuth/authenticate',
                               params={
                                   'accountPassword': 'xxxxxx',
                                   'appleId': eml,
-                                  'appIdKey': 'c991a1687d72e54d35d951a58cf7aa33fe722353b48f89d27c1ea2ffa08a4b80'
+                                  'appIdKey': 'c8fe8d0cdf54b5596f1e8374bb139214fc40876c21c39e4affc047919d83d8ae'
                               },
                               headers={'User-Agent': self.ua}
                               )
@@ -79,10 +79,9 @@ class Apple():
             else:
                 print('contact coder')
 
-        self.inputQueue.task_done()
+            self.inputQueue.task_done()
 
     def run_thread(self):
-        self.startTime = time.time()
         for x in range(int(self.thread)):
             t = threading.Thread(target=self.chk)
             t.setDaemon(True)
@@ -93,8 +92,7 @@ class Apple():
 
     def finish(self):
         print('')
-        print('Checking '+self.countList+' emails has been completed perfectly in ' +
-              time.time() - self.startTime+'seconds')
+        print('Checking', self.countList, 'emails has been completed perfectly')
         print('')
         print('Live    : ', len(list(open('rezult/live.txt'))), 'emails')
         print('Die     : ', len(list(open('rezult/die.txt'))), 'emails')
