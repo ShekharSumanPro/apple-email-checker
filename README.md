@@ -1,6 +1,6 @@
 # Apple Email Checker
 
-originally made with php but changed to a more powerful python language
+Tool to check the email list registered on Apple or not. Originally made with php but changed to a more powerful python language.
 
 ## Requirement
 
@@ -20,7 +20,3 @@ run :
 ## Screenshot
 
 ![](screenshot/3.0.png)
-
-## Video
-
--
