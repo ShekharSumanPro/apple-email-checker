@@ -4,22 +4,23 @@ originally made with php but changed to a more powerful python language
 
 ## Requirement
 
- - Python 3
+- Python 3
+- Requests
 
 ## How to run
 
 install dependencies :
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 run :
 
-    python run.py
+    python3 run.py
 
 ## Screenshot
 
-![](screenshot/2.0.png)
+![](screenshot/3.0.png)
 
 ## Video
 
-https://youtu.be/Pwp39WgGrOs
+-
